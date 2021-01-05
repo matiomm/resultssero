@@ -657,7 +657,9 @@ progress.reading-position::-moz-progress-bar {
 <script src="https://cdn.jsdelivr.net/gh/bumbeishvili/d3-tip-for-v6@4/d3-tip.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bumbeishvili/d3-tip-for-v6@4/d3-tip.min.css">
 <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.js" integrity="sha512-EnXkkBUGl2gBm/EIZEgwWpQNavsnBbeMtjklwAa7jLj60mJk932aqzXFmdPKCG6ge/i8iOCK0Uwl1Qp+S0zowg==" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.css" integrity="sha512-XXtRBFtk/QfR8GEWwQPYjrQBHQwjidXg0wo8HJi9YOaFycWqd2uWkjJoAyx8Mb/+H8uhvmf70EAIxDnQxrwrvw==" crossorigin="anonymous" />
+<script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
 <style>
     #txtValue    {
         fill:#bb6d82;
@@ -687,6 +689,9 @@ progress.reading-position::-moz-progress-bar {
         background: #9ba3cc;
         border-color: #9ba3cc;
     }
+    .noUi-connect {
+        background: #9ba3cc;
+    }
 </style>
 
 
@@ -697,22 +702,15 @@ progress.reading-position::-moz-progress-bar {
         </h1>
     </div>
     <div class="row">
-        <div class="col-lg-1">
-            <h4 style="color: #fff;">Desde:</h4>
+        <div class="col-lg-12">
+            <div id='slider-date'>
+            </div>
         </div>
-        <div class="col-lg-4">
-            <input class="form-control" id="fechai" type="date" onchange="fechasIniciales()">
-        </div>
-        <div class="col-lg-1">
-            <h4 style="color: #fff;">Hasta:</h4>
-        </div>
-        <div class="col-lg-4">
-            <input class="form-control" id="fechaf" type="date" onchange="fechasIniciales()">
-        </div>
+
     </div>
     <div class="row">
         <div class="col-lg-12">
-            <div style="margin-bottom: 20px; width: 100%; overflow: auto;">
+            <div style="margin-bottom: 20px; width: 100%; overflow: auto;" onmouseover="fixedDiv()" onmouseleave="unfixedDiv()">
                 <svg id="map" style="width: 100%; min-width: 1000px; background-color: lightgray; border-radius: 10px;">
 
                 </svg>
@@ -720,44 +718,57 @@ progress.reading-position::-moz-progress-bar {
         </div>
     </div>
     <div class="row">
-        <h1 id="titCom" style="color: #fff;">
+        <h1 id="titCom" style="color: #fff; text-transform: capitalize">
             Resultados Región Metropolitana
         </h1>
     </div>
     <div class="row">
-        <div class="col-lg-8">
-            <div class="row">
-                <div class="col-lg-4">
-                    <svg id="g1" style="width: 100%;" preserveAspectRatio="xMinYMin meet" viewBox="0 0 200 200">
+        <div class="col-lg-7">
+            <div class="row" id="dpie">
+                <div class="col-lg-12" style="text-align: center">
+                    <svg id="g1" style="width: 40%;" preserveAspectRatio="xMinYMin meet" viewBox="0 0 200 200">
                     </svg>
                 </div>
+            </div>
+            <div class="row">
                 <div class="col-lg-6">
-                    <div id="dntotal" style="display: flex; height: 25%; color: #fff;">
-
+                    <div id="dntotal" style="display: flex; color: #fff;">
                     </div>
-                    <div id="dnpos" style="display: flex; height: 25%; color: #fff;">
-
+                </div>
+                <div class="col-lg-6">
+                    <div id="dnpos" style="display: flex; color: #fff;">
                     </div>
-                    <div id="dnneg" style="display: flex; height: 25%; color: #fff;">
-
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div id="dnneg" style="display: flex; color: #fff;">
                     </div>
-                    <div id="dnnc" style="display: flex; height: 25%; color: #fff;">
-
+                </div>
+                <div class="col-lg-6">
+                    <div id="dnnc" style="display: flex; color: #fff;">
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-4" id="dfiltros" style="color: #fff;">
+        <div class="col-lg-5" id="dfiltros" style="color: #fff;">
             <div>
                 <h4 style="color: #fff;">Filtros</h4>
             </div>
 
             <div>
-                <h6 style="color: #fff;">Edad</h6>
-                <input type="range">
+                <h6 style="color: #fff;">Fecha</h6>
+                <br><br>
+                <div id="fecha" style="width: 80%; margin-left: 30px"></div>
             </div>
-
+            <br>
+            <div>
+                <h6 style="color: #fff;">Edad</h6>
+                    <br><br>
+                    <div id="edad" style="width: 80%; margin-left: 30px"></div>
+            </div>
+            <br>
             <div>
                 <h6 style="color: #fff;">Sexo Biológico</h6>
                 <div class="form-check form-check-inline">
@@ -776,293 +787,490 @@ progress.reading-position::-moz-progress-bar {
                     </label>
                 </div>
             </div>
-
+            <br>
             <div>
-                <h6 style="color: #fff;">Historial Médico</h6>
+                <h6 style="color: #fff;">Comorbilidades</h6>
                 <div class="form-check form-check-inline">
                     <label class="form-check-label">
-                        <input class="form-check-input" type="checkbox" name="comn" id="comn" onchange="checkHM('si')" checked> Ninguna
+                        <input class="form-check-input" type="checkbox" name="comn" id="Ninguna" onchange="checkHM('si')"> Ninguna
                     </label>
                 </div>
                 <div class="form-check form-check-inline">
                     <label class="form-check-label">
-                        <input class="form-check-input" type="checkbox" name="como" id="como" onchange="checkHM('no')"> Obesidad
+                        <input class="form-check-input" type="checkbox" name="como" id="Obesidad" onchange="checkHM('no')"> Obesidad
                     </label>
                 </div>
                 <div class="form-check form-check-inline">
                     <label class="form-check-label">
-                        <input class="form-check-input" type="checkbox" name="comh" id="comh" onchange="checkHM('no')"> Hipertensión
+                        <input class="form-check-input" type="checkbox" name="comh" id="Hipertension" onchange="checkHM('no')"> Hipertensión
                     </label>
                 </div>
                 <div class="form-check form-check-inline">
                     <label class="form-check-label">
-                        <input class="form-check-input" type="checkbox" name="comd" id="comd" onchange="checkHM('no')"> Diabetes
+                        <input class="form-check-input" type="checkbox" name="comd" id="Diabetes" onchange="checkHM('no')"> Diabetes
                     </label>
                 </div>
                 <div class="form-check form-check-inline">
                     <label class="form-check-label">
-                        <input class="form-check-input" type="checkbox" name="comk" id="comk" onchange="checkHM('no')"> Cáncer
+                        <input class="form-check-input" type="checkbox" name="comk" id="Cancer" onchange="checkHM('no')"> Cáncer
                     </label>
                 </div>
                 <div class="form-check form-check-inline">
                     <label class="form-check-label">
-                        <input class="form-check-input" type="checkbox" name="comr" id="comr" onchange="checkHM('no')"> Enfermedad respiratoria
+                        <input class="form-check-input" type="checkbox" name="comr" id="Enf_res" onchange="checkHM('no')"> Enfermedad respiratoria
                     </label>
                 </div>
                 <div class="form-check form-check-inline">
                     <label class="form-check-label">
-                        <input class="form-check-input" type="checkbox" name="comc" id="comc" onchange="checkHM('no')"> Enfermedad cardiovascular
+                        <input class="form-check-input" type="checkbox" name="comc" id="Enf_cv" onchange="checkHM('no')"> Enfermedad cardiovascular
                     </label>
                 </div>
             </div>
+            <div style="width: 100%; text-align: center">
+                <button class="btn btn-danger" onclick="applyFilters()" style="margin: 10px">Filtrar</button>
+                <button class="btn btn-danger" onclick="removeFilters()" style="margin: 10px">Quitar Filtros</button>
+            </div>
 
-            <button class="btn btn-danger">Filtrar</button>
         </div>
     </div>
     <br>
     <div class="row">
         <div class="col-lg-12">
-            <svg id="g3" style="width: 100%;">
-
-            </svg>
+            <svg id="g3" style="width: 100%;"></svg>
         </div>
     </div>
 </div>
 
-
 <script type="application/javascript">
-    let fulldata;
-    let dataActual;
-    let nfil=0;
-    let selected=0;
-    let fi=new Date();
-    let ff=new Date();
-    let comuna="";
-    let el   = document.getElementById("dntotal"); // or other selector like querySelector()
-    let rect = el.getBoundingClientRect();
-
-    d3.select("#dntotal").append("div").attr("class","myimg").style("margin-right","20px").style("height",Math.round(rect.height)+"px").style("width",Math.round(rect.height)+"px").append("i").attr("data-feather","users");
-    d3.select("#dnpos").append("div").attr("class","myimg").style("margin-right","20px").style("height",Math.round(rect.height)+"px").style("width",Math.round(rect.height)+"px").append("i").attr("data-feather","user-plus");
-    d3.select("#dnneg").append("div").attr("class","myimg").style("margin-right","20px").style("height",Math.round(rect.height)+"px").style("width",Math.round(rect.height)+"px").append("i").attr("data-feather","user-minus");
-    d3.select("#dnnc").append("div").attr("class","myimg").style("margin-right","20px").style("height",Math.round(rect.height)+"px").style("width",Math.round(rect.height)+"px").append("i").attr("data-feather","user-x");
-
-    feather.replace();
-    personitas();
-
-    d3.csv('dbSero.csv').then(iniciar);
+    let fullRawData, actualRawData, actualData, filters={}, comunas={};
+    let ID, FD, SID, SFD;
 
     let colorScale = d3.scaleQuantize()
         .range(colorbrewer.YlOrRd[9])
         .domain([0,1]);
 
-    let dataCom = {};
+    d3.formatDefaultLocale({
+        decimal: ",",
+        thousands: ".",
+        grouping: [3],
+        currency: ["$", ""]
+    });
 
-    function groupBy(key) {
-        return function group(array) {
-            return array.reduce((acc, obj) => {
-                const property = obj[key];
-                acc[property] = acc[property] || [];
-                acc[property].push(obj);
-                return acc;
-            }, {});
-        };
-    }
+    Promise
+        .all([
+            d3.csv('dbSero.csv')
+                .then(asingFullData)
+                .then(dateRange)
+                .then(filterData),
+            Promise
+                .all([
+                    d3.json('geojsons/comunas_rm.geojson'),
+                    d3.json('geojsons/valparaiso.geojson'),
+                    d3.json('geojsons/ohiggins.geojson')
+                ])
+                .then(resolve => fixGeojsons(resolve))
+                .then(resolve => createMap(resolve[0], resolve[1], resolve[2]))
+        ])
+        .then(() => {
+            paintMap();
+            createSliders();
+            updateNumbers();
+        });
 
-    function parseFecha(fecha){
-        let aux = fecha.split(" ");
+    setNumbers();
+
+    // Utility functions
+    function parseDate(date){
+        let aux = date.split(" ");
         let dateParts = aux[0].split("/");
         var dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
         return dateObject;
     }
 
-    function fechasIniciales(){
-        let strings = fulldata.map(a => a["Fecha_hora"]);
-        let valores = [...new Set(strings)];
-        let fechas = valores.map(parseFecha);
-        ff=new Date(Math.max.apply(null, fechas));
-        fi=new Date(Math.min.apply(null, fechas));
-        let sfi=fi.getFullYear()+"-"+fi.getMonth()+"-"+fi.getDate();
-        let sff=ff.getFullYear()+"-"+ff.getMonth()+"-"+ff.getDate();
-
-        d3.select("#fechai")
-            .attr("value",sfi)
-            .attr("min",sfi)
-            .attr("max",sff);
-
-        d3.select("#fechaf")
-            .attr("value",sff)
-            .attr("min",sfi)
-            .attr("max",sff);
-
+    function parseDate2(date){
+        let dateParts = date.split("/");
+        var dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
+        return dateObject;
     }
 
-    function iniciar(data){
-        console.log(data);
-        fulldata = data;
-        let col = d3.select("#columnas0");
-        let dfil = d3.select("#dfiltros");
-        fechasIniciales();
-
-        graficar(data);
-
-        const groupComunas = groupBy("Comuna_dom");
-        let dataComunas = groupComunas(data);
-
-        Promise
-            .all(calcDataComunas(dataComunas))
-            .then(mapa());
+    function dateRange(){
+        let strings = fullRawData.map(a => a["Fecha_hora"]);
+        let values = [...new Set(strings)];
+        let dates = values.map(parseDate);
+        ID = new Date(Math.min.apply(null, dates));
+        FD = new Date(Math.max.apply(null, dates));
+        SID = ID.getDate()+"/"+(ID.getMonth()+1)+"/"+ID.getFullYear();
+        SFD = FD.getDate()+"/"+(FD.getMonth()+1)+"/"+FD.getFullYear();
     }
 
-    function dibujar(){
-        d3.select("#dntotalhijo").remove();
-        d3.select("#dnposhijo").remove();
-        d3.select("#dnneghijo").remove();
-        d3.select("#dnnchijo").remove();
-        d3.select("#map").html("");
-
-        graficar(dataActual);
-
-        const groupComunas = groupBy("Comuna_dom");
-        let dataComunas = groupComunas(data);
-        Promise
-            .all(calcDataComunas(dataComunas))
-            .then(mapa());
-    }
-
-    function actualizarDataActual(){
-        let nd = fulldata.filter(function (d){
-            cond1 = parseFecha(d["Fecha_hora"])>=fi;
-            cond2 = parseFecha(d["Fecha_hora"])<=ff;
-            return cond1 && cond2;
-        });
-        console.log(nd);
-    }
-
-    function calcDataComunas(data){
-        let dc = {};
+    function fixGeojsons(data){
         for (i in data){
-            dc[i] = calcPos(data[i]);
+            data[i].features.forEach(function(feature) {
+                feature.geometry = turf.rewind(feature.geometry, {reverse:true});
+            });
         }
-        dataCom = dc;
-        return "listo";
+        return data;
     }
 
-    function filtrar(){
-        d3.select("#dntotalhijo").remove();
-        d3.select("#dnposhijo").remove();
-        d3.select("#dnneghijo").remove();
-        d3.select("#dnnchijo").remove();
-
-        var columna = document.getElementById("columnas0").value;
-        var valor = document.getElementById("valores0").value;
-
-        let nd = fulldata.filter(function (d){
-            return d[columna] == valor;
-        });
-
-        console.log(nd);
-        graficar(nd);
+    function timestampToStr(tmp) {
+        let date =  new Date();
+        let of = date.getTimezoneOffset();
+        date = new Date(tmp + of*60*1000);
+        return date.getDate()+'/'+(date.getMonth()+1)+"/"+date.getFullYear()
     }
 
-    function filtrarComuna(comuna){
-        d3.select("#dntotalhijo").remove();
-        d3.select("#dnposhijo").remove();
-        d3.select("#dnneghijo").remove();
-        d3.select("#dnnchijo").remove();
-
-        let nd = fulldata.filter(function (d){
-            return d["Comuna_dom"] == comuna;
-        });
-
-        console.log(nd);
-        graficar(nd);
-    }
-
-    function quitarFiltros(){
-        nfil=0;
-        d3.select("#dntotalhijo").remove();
-        d3.select("#dnposhijo").remove();
-        d3.select("#dnneghijo").remove();
-        d3.select("#dnnchijo").remove();
-        dsel = d3.select("#dsel");
-        dsel.html("");
-        dsel.append("select").attr("id","columnas0").attr("onchange","vInput(this,0)");
-        dsel.append("select").attr("id","valores0");
-        iniciar(fulldata);
-    }
-
-    function agregarFiltro(){
-        data=fulldata;
-        nfil++;
-        let dsel = d3.select("#dsel");
-        dsel.append("br");
-        let col = dsel.append("select").attr("id","columnas"+nfil).attr("onchange","vInput(this,"+nfil+")");
-        let val = dsel.append("select").attr("id","valores"+nfil);
-        for (i in data.columns){
-            col.append("option").attr("value",data.columns[i]).text(data.columns[i]);
+    function arraysEqual(a, b) {
+        if (a === b) return true;
+        if (a == null || b == null) return false;
+        if (a.length !== b.length) return false;
+        for (var i = 0; i < a.length; ++i) {
+            if (a[i] !== b[i]) return false;
         }
+        return true;
     }
 
-    function calcPos(data){
-        let pos = data.filter(function (d){
-            return d.Resultado == 'positivo';
+    function isEmpty(obj) {
+        for(var prop in obj) {
+            if(obj.hasOwnProperty(prop)) {
+                return false;
+            }
+        }
+        return JSON.stringify(obj) === JSON.stringify({});
+    }
+
+    // Data functions
+    function asingFullData(data){
+        fullRawData = data;
+    }
+
+    function filterData(){
+        actualRawData = fullRawData.filter(function (d){
+            let conditions = [1], i = 1, finalCondition = 1;
+
+            for (k in filters){
+                if (k == 'Comuna_dom')
+                    continue;
+                else if (k == 'minDate')
+                    conditions[i++] = parseDate(d["Fecha_hora"])>=parseDate2(filters[k]);
+                else if (k == 'maxDate')
+                    conditions[i++] = parseDate(d["Fecha_hora"])<=parseDate2(filters[k]);
+                else if (k == 'minAge')
+                    conditions[i++] = d['Edad']>=filters[k];
+                else if (k == 'maxAge')
+                    conditions[i++] = d['Edad']<=filters[k];
+                else
+                    conditions[i++] = d[k]==filters[k];
+            }
+            for (j in conditions)
+                finalCondition *= conditions[j];
+
+            return finalCondition;
         });
-        return Math.round(pos.length/data.length*1000)/1000;
+
+        actualData = processData(actualRawData);
+        console.log(actualRawData);
+        console.log('wewe');
+        console.log(actualData);
     }
 
-    function calcInd(data){
-        let pos = data.filter(function (d){
-            return d.Resultado == 'positivo';
+    function processData(data){
+        let allZoneNames = data.map(a => a['Comuna_dom']);
+        let zoneNames = [...new Set(allZoneNames)];
+        let finalData = {};
+        let filterPositiveZonaData = data.filter(function (d){
+            return d['Resultado'] === 'positivo';
         });
-        let neg = data.filter(function (d){
-            return d.Resultado == 'negativo';
+        let filterNegativeZonaData = data.filter(function (d){
+            return d['Resultado'] === 'negativo';
         });
-        return [data.length,pos.length,neg.length,data.length-pos.length-neg.length];
+        finalData['RM'] = {
+            'totalTests': data.length,
+            'positiveTests': filterPositiveZonaData.length,
+            'negativeTests': filterNegativeZonaData.length,
+            'invalidTests': data.length - filterPositiveZonaData.length - filterNegativeZonaData.length
+        };
+        finalData['no'] = {
+            'totalTests': 0,
+            'positiveTests': 0,
+            'negativeTests': 0,
+            'invalidTests': 0
+        };
+        for (i in zoneNames){
+            let filterZoneData = data.filter(function (d){
+               return d['Comuna_dom'] === zoneNames[i];
+            });
+            filterPositiveZonaData = filterZoneData.filter(function (d){
+                return d['Resultado'] === 'positivo';
+            });
+            filterNegativeZonaData = filterZoneData.filter(function (d){
+                return d['Resultado'] === 'negativo';
+            });
+
+            finalData[zoneNames[i].toUpperCase()] = {
+                'totalTests': filterZoneData.length,
+                'positiveTests': filterPositiveZonaData.length,
+                'negativeTests': filterNegativeZonaData.length,
+                'invalidTests': filterZoneData.length - filterPositiveZonaData.length - filterNegativeZonaData.length
+            };
+        }
+        return finalData;
     }
 
-    function graficar(data){
-        let cifras = calcInd(data);
-
-        numeros("#dntotal",cifras[0],"Tests realizados");
-        numeros("#dnpos",cifras[1],"Tests positivos");
-        numeros("#dnneg",cifras[2],"Tests negativos");
-        numeros("#dnnc",cifras[3],"Tests no concluyentes");
-
-        piechart(cifras,"#g1");
-
-        pintarPersonitas(cifras);
+    function blendData(zones,data){
+        let newZones = zones;
+        for (i in zones.features){
+            newZones.features[i].properties['dataTests']=data[zones.features[i].properties.NOM_COMUNA];
+        }
+        return newZones;
     }
 
-    function numeros(id,numero,descripcion){
-        let div = d3.select(id).append("div").attr("id",id.substr(1)+"hijo").style("display","block");
+    // Setup functions
 
-        div.append("div")
-            .style("height",Math.round(rect.height)*0.75+"px")
-            .style("font-size",Math.round(rect.height)*0.75+"px")
-            .style("line-height",Math.round(rect.height)*0.75+"px")
+    function setNumbers(){
+        let el1   = document.getElementById("dpie"); // or other selector like querySelector()
+        let rect1 = el1.getBoundingClientRect();
+        let el2   = document.getElementById("dfiltros"); // or other selector like querySelector()
+        let rect2 = el2.getBoundingClientRect();
+        let height = (rect2.height - rect1.height)/3;
+        d3.select("#dntotal").append("div").attr("class","myimg").style("margin-right","20px").style("height",Math.round(height)+"px").style("width",Math.round(height)+"px").append("i").attr("data-feather","users");
+        d3.select("#dnpos").append("div").attr("class","myimg").style("margin-right","20px").style("height",Math.round(height)+"px").style("width",Math.round(height)+"px").append("i").attr("data-feather","user-plus");
+        d3.select("#dnneg").append("div").attr("class","myimg").style("margin-right","20px").style("height",Math.round(height)+"px").style("width",Math.round(height)+"px").append("i").attr("data-feather","user-minus");
+        d3.select("#dnnc").append("div").attr("class","myimg").style("margin-right","20px").style("height",Math.round(height)+"px").style("width",Math.round(height)+"px").append("i").attr("data-feather","user-x");
+        feather.replace();
+    }
+
+    // Draw functions
+    function createMap(rm,val,bo){
+        comunas = rm;
+        let svg = d3.select('#map');
+        let el   = document.getElementById("map"); // or other selector like querySelector()
+        let rect = el.getBoundingClientRect(); // get the bounding rectangle
+
+        let ancho = rect.width;
+
+        svg.style("height",600);
+
+        var defs = svg.append("defs");
+
+        var linearGradient = defs.append("linearGradient")
+            .attr("id", "linear-gradient");
+
+        linearGradient.selectAll("stop")
+            .data( colorScale.range() )
+            .enter().append("stop")
+            .attr("offset", (d,i) => i/(colorScale.range().length-1))
+            .attr("stop-color", d => d);
+
+        let projection = d3.geoMercator()
+            .scale(20000)
+            .center([-71.1, -33.47]);
+
+        let geoPath = d3.geoPath().projection(projection);
+
+        var g = svg.append("g");
+
+        g.selectAll("path .stgo")
+            .data(rm.features).enter()
+            .append("path")
+            .attr("d", geoPath)
+            .attr("id", d => d.properties.NOM_COMUNA)
+            .attr("class", "stgo")
+            .attr("sel",0)
+            .attr("onmouseover","highlightZone(this)")
+            .attr("onmouseout","unhighlightZone(this)")
+            .attr("onclick","selectZone(this)")
+            .style("cursor","pointer")
+            .style("fill", "white")
+            .style("stroke", "lightgray");
+
+        g.selectAll("path .bo")
+            .data(bo.features).enter()
+            .append("path")
+            .attr("d", geoPath)
+            .attr("id", d => d.id)
+            .attr("class", "bo")
+            .style("fill", "white");
+
+        g.selectAll("path .val")
+            .data(val.features).enter()
+            .append("path")
+            .attr("d", geoPath)
+            .attr("id", d => d.id)
+            .attr("class", "val")
+            .style("fill", "white");
+
+        var zoom = d3.zoom()
+            .scaleExtent([1, 8])
+            .on('zoom', function(event) {
+                g.selectAll('path')
+                    .attr('transform', event.transform);
+            });
+
+        svg.call(zoom);
+
+        svg.append("rect")
+            .attr("width", ancho/4)
+            .attr("height", 15)
+            .attr("x",ancho*0.75-20)
+            .attr("y",30)
+            .attr("rx",10)
+            .style("fill", "url(#linear-gradient)");
+
+        svg.append("text")
+            .attr("x",ancho*0.75-20)
+            .attr("y",25)
+            .style("text-anchor", "middle")
+            .style("font-size","14px")
             .style("letter-spacing", "-.03em")
-            .text(numero);
+            .text("0%");
 
-        div.append("div")
-            .style("height",Math.round(rect.height)*0.25+"px")
-            .style("font-size",Math.round(rect.height)*0.25+"px")
-            .style("line-height",Math.round(rect.height)*0.25+"px")
+        svg.append("text")
+            .attr("x",ancho-20)
+            .attr("y",25)
+            .style("text-anchor", "middle")
+            .style("font-size","14px")
             .style("letter-spacing", "-.03em")
-            .text(descripcion);
+            .text("100%");
     }
 
+    function paintMap(){
+        console.log('hola')
+        let newData = blendData(comunas,actualData);
+        let zones = d3.selectAll(".stgo")
+            .style('fill',function (d){
+                if (d.properties.dataTests){
+                    let positivity = d.properties.dataTests.positiveTests/d.properties.dataTests.totalTests;
+                    return colorScale(positivity);
+                }
+                else
+                    return "#9ba3cc";
+            });
 
-    function porcentaje(array){
-        let sum = array[0];
-        let por = [];
-        for (let i=1;i<4;i++){
-            por[i-1] = Math.round((array[i]/sum)*1000)/10;
+        const tip = d3.tip()
+            .attr('class', 'd3-tip')
+            .html(function(event,d) {
+                let html = "<div style='text-align: center'>" + d.properties.NOM_COMUNA + "</div><div style='text-align: center'>"
+                if (d.properties.dataTests) {
+                    let positivity = d.properties.dataTests.positiveTests / d.properties.dataTests.totalTests;
+                    let desc = (d.properties.dataTests.totalTests==1)?" Test realizado":" Tests realizados";
+                    html += d.properties.dataTests.totalTests+desc+"</div><div style='text-align: center'>";
+                    return html + 'Positividad: ' + d3.format(",.3~p")(positivity) + "</div>";
+                }
+                else
+                    return html+"(Sin Registros)</div>";
+            });
+
+        d3.select("#map").call(tip);
+
+        zones.on('mouseenter.tip',tip.show)
+            .on('mouseleave.tip',tip.hide);
+
+    }
+
+    function mapFilters(){
+        d3.selectAll('.filterLabels').remove();
+        if (!isEmpty(filters)){
+            let svg = d3.select('#map');
+            svg.append("text")
+                .attr("x",0)
+                .attr("y",25)
+                .attr("class",'filterLabels')
+                .style("text-anchor", "start")
+                .style("font-size","14px")
+                .style("letter-spacing", "-.03em")
+                .style("font-weight",'bold')
+                .text("Filtros Activos:");
+
+            svg.append("text")
+                .attr("x",120)
+                .attr("y",27)
+                .attr("class",'filterLabels')
+                .attr('onclick','removeFilters()')
+                .style("text-anchor", "start")
+                .style("font-size","25px")
+                .style("letter-spacing", "-.03em")
+                .style("font-weight",'bold')
+                .style('cursor',"pointer")
+                .text("x");
+
+            let j = 2;
+            for (i in filters){
+                if (i == 'maxAge' || i == 'maxDate')
+                    continue;
+                if (i == 'Comuna_dom'){
+                    svg.append("text")
+                        .attr("x",0)
+                        .attr("y",25*(j++))
+                        .attr("class",'filterLabels')
+                        .style("text-anchor", "start")
+                        .style("font-size","14px")
+                        .style("letter-spacing", "-.03em")
+                        .style('text-transform','capitalize')
+                        .text("Comuna: "+filters[i].toLowerCase());
+                }
+                else if (i == 'minDate'){
+                    svg.append("text")
+                        .attr("x",0)
+                        .attr("y",25*(j++))
+                        .attr("class",'filterLabels')
+                        .style("text-anchor", "start")
+                        .style("font-size","14px")
+                        .style("letter-spacing", "-.03em")
+                        .text("Fecha: "+filters[i]+" a "+filters['maxDate']);
+                }
+                else if (i == 'minAge'){
+                    svg.append("text")
+                        .attr("x",0)
+                        .attr("y",25*(j++))
+                        .attr("class",'filterLabels')
+                        .style("text-anchor", "start")
+                        .style("font-size","14px")
+                        .style("letter-spacing", "-.03em")
+                        .text("Edad: "+filters[i]+" a "+filters['maxAge']);
+                }
+                else if (i == 'Sexo'){
+                    const sex = {'H': 'Hombre', 'M': 'Mujer', '-': "No Declarado"};
+                    svg.append("text")
+                        .attr("x",0)
+                        .attr("y",25*(j++))
+                        .attr("class",'filterLabels')
+                        .style("text-anchor", "start")
+                        .style("font-size","14px")
+                        .style("letter-spacing", "-.03em")
+                        .text("Sexo: "+sex[filters[i]]);
+                }
+                else{
+                    let label = i;
+                    if (label=='Ninguna')
+                        label='Ninguna comorbilidad'
+                    else if (label=='Enf_res')
+                        label='Enfermedad respiratoria'
+                    else if (label=='Enf_cv')
+                        label='Enfermedad cardiovascular'
+                    svg.append("text")
+                        .attr("x",0)
+                        .attr("y",25*(j++))
+                        .attr("class",'filterLabels')
+                        .style("text-anchor", "start")
+                        .style("font-size","14px")
+                        .style("letter-spacing", "-.03em")
+                        .text(label);
+                }
+            }
         }
-        return por;
     }
 
     function piechart (rdata,id0){
-        let data = porcentaje(rdata);
+        if (rdata.totalTests==0){
+            data = [0,0,0];
+        }
+        else{
+            data = [
+                rdata.positiveTests/rdata.totalTests,
+                rdata.negativeTests/rdata.totalTests,
+                rdata.invalidTests/rdata.totalTests,
+            ];
+        }
         let colors = ["#dc3545","#9ba3cc","#6c757d"];
 
         let sizes = {
@@ -1093,7 +1301,7 @@ progress.reading-position::-moz-progress-bar {
                     .style("fill","#fff")
                     .style("text-anchor", "middle")
                     .style("letter-spacing", "-.03em")
-                    .text(data[i]+"%");
+                    .text(d3.format(",.3~p")(data[i]));
 
                 gpos.append("text")
                     .attr("x",100)
@@ -1121,8 +1329,8 @@ progress.reading-position::-moz-progress-bar {
                 .attr("id",(d, i) => "a"+ids[i])
                 .attr("class","arcos")
                 .style("fill", (d, i) => colors[i])
-                .on("mouseover", highlight)
-                .on("mouseout", unhighlight);
+                .on("mouseover", highlightPie)
+                .on("mouseout", unhighlightPie);
 
             let angleInterpolation = d3.interpolate(generator.startAngle()(), generator.endAngle()());
 
@@ -1159,7 +1367,84 @@ progress.reading-position::-moz-progress-bar {
         }
     }
 
-    function highlight(){
+    function numeros(id,numero,descripcion){
+        let el   = document.getElementById("dntotal"); // or other selector like querySelector()
+        let rect = el.getBoundingClientRect();
+        d3.select(id+"hijo").remove();
+        let div = d3.select(id).append("div").attr("id",id.substr(1)+"hijo").style("display","block");
+
+        div.append("div")
+            .style("height",Math.round(rect.height)*0.75+"px")
+            .style("font-size",Math.round(rect.height)*0.75+"px")
+            .style("line-height",Math.round(rect.height)*0.75+"px")
+            .style("letter-spacing", "-.03em")
+            .text(numero);
+
+        div.append("div")
+            .style("height",Math.round(rect.height)*0.15+"px")
+            .style("font-size",Math.round(rect.height)*0.15+"px")
+            .style("line-height",Math.round(rect.height)*0.15+"px")
+            .style("letter-spacing", "-.03em")
+            .text(descripcion);
+    }
+
+    // Interaction functions
+
+    function fixedDiv(){
+        d3.select("body").style("overflow","hidden");
+    }
+
+    function unfixedDiv(){
+        d3.select("body").style("overflow","auto");
+    }
+
+    function highlightZone(com){
+        d3.select(com).style('fill','#28a745');
+    }
+
+    function unhighlightZone(com){
+        if (filters['Comuna_dom'] && filters['Comuna_dom']!=com.id){
+            d3.select(com).style('fill',"#9ba3cc");
+        }
+        else {
+            d3.select(com).style('fill',function (d){
+                if (d.properties.dataTests){
+                    let positivity = d.properties.dataTests.positiveTests/d.properties.dataTests.totalTests;
+                    return colorScale(positivity);
+                }
+                else if (filters['Comuna_dom']==com.id)
+                    return "#28a745";
+                else
+                    return "#9ba3cc";
+            });
+        }
+    }
+
+    function selectZone(com){
+        d3.select('#titCom').text('Resultados '+com.id.toLowerCase());
+        filters['Comuna_dom'] = com.id;
+        d3.selectAll(".stgo").style('fill',"#9ba3cc");
+        d3.select(com).style('fill',function (d){
+            if (d.properties.dataTests){
+                let positivity = d.properties.dataTests.positiveTests/d.properties.dataTests.totalTests;
+                return colorScale(positivity);
+            }
+            else
+                return "#28a745";
+        });
+        mapFilters();
+        let zone = com.id;
+        if (!actualData[zone])
+            zone = 'no';
+        piechart(actualData[zone], '#g1');
+        numeros("#dntotal", actualData[zone].totalTests, "Tests realizados");
+        numeros("#dnpos", actualData[zone].positiveTests, "Tests positivos");
+        numeros("#dnneg", actualData[zone].negativeTests, "Tests negativos");
+        numeros("#dnnc", actualData[zone].invalidTests, "Tests no concluyentes");
+
+    }
+
+    function highlightPie(){
         d3.select("#"+this.id)
             .style("stroke","#fff");
 
@@ -1171,7 +1456,7 @@ progress.reading-position::-moz-progress-bar {
         }
     }
 
-    function unhighlight(){
+    function unhighlightPie(){
         d3.select("#"+this.id)
             .style("stroke",null);
 
@@ -1182,262 +1467,203 @@ progress.reading-position::-moz-progress-bar {
             .style("display","block");
     }
 
-    function nPersonitas(array){
-        let por = porcentaje(array);
-        let np = [Math.round(2*por[0]),Math.round(2*por[2])];
-        return np;
-    }
-
-    function personitas(){
-        let svg1 = d3.select('#g3');
-
-        var el   = document.getElementById("g3"); // or other selector like querySelector()
-        var rect = el.getBoundingClientRect(); // get the bounding rectangle
-
-        let mw = rect.width/40;
-
-        svg1.style("height",5*2.2*mw);
-
-        for (let i=0; i<200; i++){
-            let monito = svg1.append("g")
-                .attr("id","m"+i);
-
-            monito.append("circle")
-                .attr("r",(mw/2)*0.6)
-                .attr("cx",mw/2+(i%40)*mw)
-                .attr("cy",mw/2+(Math.floor(i/40)*2.1*mw))
-                .attr("fill","#9ba3cc");
-
-            monito.append("rect")
-                .attr("x",mw*0.1+(i%40)*mw)
-                .attr("y",mw*0.8+(Math.floor(i/40)*2.1*mw))
-                .attr("height",mw*0.8)
-                .attr("width",mw*0.8)
-                .attr("rx",mw*0.15)
-                .attr("fill","#9ba3cc");
-
-            monito.append("rect")
-                .attr("x",mw*0.25+(i%40)*mw)
-                .attr("y",mw*1.4+(Math.floor(i/40)*2.1*mw))
-                .attr("height",mw*0.8)
-                .attr("width",mw*0.5)
-                .attr("rx",mw*0.15)
-                .attr("fill","#9ba3cc");
-        }
-    }
-
-    function pintarPersonitas(data){
-        for (let i=0; i<200; i++){
-            d3.select("#m"+i).selectChildren().transition().attr("fill","#9ba3cc");
-        }
-        let colors = ["#dc3545","#6c757d"];
-        let np = nPersonitas(data);
-        for (let i=0; i<(np[0]+np[1]); i++){
-            let ic = 0;
-            if (i>=np[0])
-                ic = 1;
-            d3.select("#m"+i).selectChildren().transition().attr("fill",colors[ic]);
-        }
-    }
-
-
-    function mapa(){
-        Promise
-            .all([
-                d3.json('rm.geojson'),
-                d3.json('rval.geojson'),
-                d3.json('rbo.geojson')
-            ])
-            .then(resolve => {
-                createMap(resolve[0], resolve[1], resolve[2]);
-            });
-    }
-
-    function createMap(rm,val,bo){
-        let svg = d3.select('#map');
-
-        let el   = document.getElementById("map"); // or other selector like querySelector()
-        let rect = el.getBoundingClientRect(); // get the bounding rectangle
-
-        let ancho = rect.width;
-
-        svg.style("height",600);
-
-        var defs = svg.append("defs");
-
-        var linearGradient = defs.append("linearGradient")
-            .attr("id", "linear-gradient");
-
-        linearGradient.selectAll("stop")
-            .data( colorScale.range() )
-            .enter().append("stop")
-            .attr("offset", function(d,i) { return i/(colorScale.range().length-1); })
-            .attr("stop-color", function(d) { return d; });
-
-        let projection = d3.geoMercator()
-            .scale(20000)
-            .center([-71, -33.47]);
-
-        let geoPath = d3.geoPath().projection(projection);
-
-        let comunas = d3.select("#map").selectAll("path .stgo")
-            .data(rm.features).enter()
-            .append("path")
-            .attr("d", geoPath)
-            .attr("id", d => d.properties.NOM_COM)
-            .attr("class", "stgo")
-            .attr("onmouseover",d => "highlightCom("+dataCom[d.properties.NOM_COM]+",this)")
-            .attr("onmouseout",d => "unhighlightCom("+dataCom[d.properties.NOM_COM]+",this)")
-            .attr("onclick",d => "selectCom("+dataCom[d.properties.NOM_COM]+",this)")
-            .attr("sel",0)
-            .style("cursor","pointer")
-            .style("fill", function (d){
-                if (dataCom[d.properties.NOM_COM] || dataCom[d.properties.NOM_COM]==0)
-                    return colorScale(dataCom[d.properties.NOM_COM]);
-                else
-                    return "#9ba3cc";
-            })
-            .style("stroke", d => "lightgray");
-
-        const tip = d3.tip()
-            .attr('class', 'd3-tip')
-            .html(function(event,d) {
-                let dato = dataCom[d.properties.NOM_COM];
-                let html = "<div style='text-align: center'>"+d.properties.NOM_COM+"</div><div style='text-align: center'>"
-                if (dato || dato==0)
-                    return html+(Math.round(dato*1000)/10)+"%</div>";
-                else
-                    return html+"(Sin Registros)</div>";
-            });
-
-        svg.call(tip);
-
-        comunas.on('mouseenter.tip',tip.show)
-            .on('mouseleave.tip',tip.hide);
-
-        d3.select("#map").selectAll("path .bo")
-            .data(bo.features).enter()
-            .append("path")
-            .attr("d", geoPath)
-            .attr("id", d => d.id)
-            .attr("class", "bo")
-            .style("fill", "white")
-            .style("stroke", d => "white");
-
-        d3.select("#map").selectAll("path .val")
-            .data(val.features).enter()
-            .append("path")
-            .attr("d", geoPath)
-            .attr("id", d => d.id)
-            .attr("class", "val")
-            .style("fill", "white")
-            .style("stroke", d => "white");
-
-        svg.append("rect")
-            .attr("width", ancho/4)
-            .attr("height", 15)
-            .attr("x",ancho*0.75-20)
-            .attr("y",30)
-            .attr("rx",10)
-            .style("fill", "url(#linear-gradient)");
-
-        svg.append("text")
-            .attr("x",ancho*0.75-20)
-            .attr("y",25)
-            .style("text-anchor", "middle")
-            .style("font-size","14px")
-            .style("letter-spacing", "-.03em")
-            .text("0%");
-
-        svg.append("text")
-            .attr("x",ancho-20)
-            .attr("y",25)
-            .style("text-anchor", "middle")
-            .style("font-size","14px")
-            .style("letter-spacing", "-.03em")
-            .text("100%");
-
-    }
-
-    function highlightCom(dato,com){
-        d3.select(com).style("fill","#28a745");
-    }
-
-    function selectCom(dato,com){
-        let sel = d3.select(com).attr("sel");
-        if (sel==1){
-            selected=0;
-            d3.selectAll(".stgo").attr("sel",0).style("fill", function (d){
-                if (dataCom[d.properties.NOM_COM] || dataCom[d.properties.NOM_COM]==0)
-                    return colorScale(dataCom[d.properties.NOM_COM]);
-                else
-                    return "#9ba3cc";
-            });
-            d3.select("#titCom").html("Resultados Región Metropolitana");
-
-            quitarFiltros();
-        }
-        else{
-            selected=1;
-            d3.selectAll(".stgo").attr("sel",0).style("fill","#9ba3cc");
-            d3.select("#titCom").html("Resultados "+ d3.select(com).attr("id"));
-            d3.select(com).style("fill",function (d){
-                if (dato)
-                    return colorScale(dato);
-                else
-                    return "#dc3545";
-            });
-            d3.select(com).attr("sel",1);
-
-            filtrarComuna(d3.select(com).attr("id"));
-        }
-    }
-
-    function unhighlightCom(dato,com){
-        let sel = d3.select(com).attr("sel");
-        if (selected){
-            if (sel==1)
-                d3.select(com).style("fill",function (d){
-                    if (dato || dato==0)
-                        return colorScale(dato);
-                    else
-                        return "#dc3545";
-                });
-            else
-                d3.select(com).style("fill","#9ba3cc");
-        }
-        else{
-            if (sel==1)
-                d3.select(com).style("fill",function (d){
-                    if (dato || dato==0)
-                        return "#dc3545";//colorScale(dato);
-                    else
-                        return "#dc3545";
-                });
-            else
-                d3.select(com).style("fill",function (d){
-                    if (dato || dato==0){
-                        return colorScale(dato);
-                    }
-                    else
-                        return "#9ba3cc";
-                });
-        }
-    }
     function checkHM(sacar) {
         if (sacar=="si"){
-            d3.select("#como").property("checked",false);
-            d3.select("#comh").property("checked",false);
-            d3.select("#comd").property("checked",false);
-            d3.select("#comk").property("checked",false);
-            d3.select("#comr").property("checked",false);
-            d3.select("#comc").property("checked",false);
+            d3.select("#Obesidad").property("checked",false);
+            d3.select("#Hipertension").property("checked",false);
+            d3.select("#Diabetes").property("checked",false);
+            d3.select("#Cancer").property("checked",false);
+            d3.select("#Enf_res").property("checked",false);
+            d3.select("#Enf_cv").property("checked",false);
         }
         else{
-            d3.select("#comn").property("checked",false);
+            d3.select("#Ninguna").property("checked",false);
         }
     }
 
+    function applyFilters(){
+        let setFilters = new Promise(() => {
+            filters = {};
+            var dateSlider = document.getElementById('fecha').noUiSlider.get();
+            if (!arraysEqual(dateSlider,[SID,SFD])){
+                filters['minDate'] = dateSlider[0];
+                filters['maxDate'] = dateSlider[1];
+            }
+            var ageSlider = document.getElementById('edad').noUiSlider.get();
+            if (!arraysEqual(ageSlider,[0,100])){
+                filters['minAge'] = ageSlider[0];
+                filters['maxAge'] = ageSlider[1];
+            }
+            var sexo = document.querySelector('input[name="sexo"]:checked');
+            if(sexo)
+                filters['Sexo'] = sexo.value;
+            var comor = document.getElementsByClassName("form-check-input");
+            for (i in comor){
+                if (comor[i].type=='checkbox'){
+                    if(comor[i].checked)
+                        filters[comor[i].id]=1;
+
+                }
+            }
+        });
+        setFilters.then(filterData())
+            .then(paintMap())
+            .then(mapFilters())
+            .then(updateNumbers());
+
+    }
+
+    function removeFilters(){
+        let deleteFilters = new Promise(() => {
+            filters = {};
+        });
+        deleteFilters.then(filterData())
+            .then(paintMap())
+            .then(mapFilters())
+            .then(updateNumbers());
+
+        var dateSlider = document.getElementById('fecha');
+        dateSlider.noUiSlider.set([ID.getTime(),FD.getTime()]);
+        var ageSlider = document.getElementById('edad');
+        ageSlider.noUiSlider.set([0,100]);
+
+        var choices = document.getElementsByClassName("form-check-input");
+        for (i in choices)
+            choices[i].checked = false;
+    }
+
+    function updateNumbers(){
+        d3.select('#titCom').text('Resultados Región Metropolitana')
+        piechart(actualData['RM'],'#g1');
+        numeros("#dntotal",actualData['RM'].totalTests,"Tests realizados");
+        numeros("#dnpos",actualData['RM'].positiveTests,"Tests positivos");
+        numeros("#dnneg",actualData['RM'].negativeTests,"Tests negativos");
+        numeros("#dnnc",actualData['RM'].invalidTests,"Tests no concluyentes");
+    }
+
+    // Sliders Functions
+    /**
+     * @param slider HtmlElement with an initialized slider
+     * @param threshold Minimum proximity (in percentages) to merge tooltips
+     * @param separator String joining tooltips
+     */
+    function mergeTooltips(slider, threshold, separator) {
+
+        var textIsRtl = getComputedStyle(slider).direction === 'rtl';
+        var isRtl = slider.noUiSlider.options.direction === 'rtl';
+        var isVertical = slider.noUiSlider.options.orientation === 'vertical';
+        var tooltips = slider.noUiSlider.getTooltips();
+        var origins = slider.noUiSlider.getOrigins();
+
+        // Move tooltips into the origin element. The default stylesheet handles this.
+        tooltips.forEach(function (tooltip, index) {
+            if (tooltip) {
+                origins[index].appendChild(tooltip);
+            }
+        });
+
+        slider.noUiSlider.on('update', function (values, handle, unencoded, tap, positions) {
+
+            var pools = [[]];
+            var poolPositions = [[]];
+            var poolValues = [[]];
+            var atPool = 0;
+
+            // Assign the first tooltip to the first pool, if the tooltip is configured
+            if (tooltips[0]) {
+                pools[0][0] = 0;
+                poolPositions[0][0] = positions[0];
+                poolValues[0][0] = values[0];
+            }
+
+            for (var i = 1; i < positions.length; i++) {
+                if (!tooltips[i] || (positions[i] - positions[i - 1]) > threshold) {
+                    atPool++;
+                    pools[atPool] = [];
+                    poolValues[atPool] = [];
+                    poolPositions[atPool] = [];
+                }
+
+                if (tooltips[i]) {
+                    pools[atPool].push(i);
+                    poolValues[atPool].push(values[i]);
+                    poolPositions[atPool].push(positions[i]);
+                }
+            }
+
+            pools.forEach(function (pool, poolIndex) {
+                var handlesInPool = pool.length;
+
+                for (var j = 0; j < handlesInPool; j++) {
+                    var handleNumber = pool[j];
+
+                    if (j === handlesInPool - 1) {
+                        var offset = 0;
+
+                        poolPositions[poolIndex].forEach(function (value) {
+                            offset += 1000 - 10 * value;
+                        });
+
+                        var direction = isVertical ? 'bottom' : 'right';
+                        var last = isRtl ? 0 : handlesInPool - 1;
+                        var lastOffset = 1000 - 10 * poolPositions[poolIndex][last];
+                        offset = (textIsRtl && !isVertical ? 100 : 0) + (offset / handlesInPool) - lastOffset;
+
+                        // Center this tooltip over the affected handles
+                        tooltips[handleNumber].innerHTML = poolValues[poolIndex].join(separator);
+                        tooltips[handleNumber].style.display = 'block';
+                        tooltips[handleNumber].style[direction] = offset + '%';
+                    } else {
+                        // Hide this tooltip
+                        tooltips[handleNumber].style.display = 'none';
+                    }
+                }
+            });
+        });
+    }
+
+    function createSliders(){
+        var dateSlider = document.getElementById('fecha');
+
+        noUiSlider.create(dateSlider, {
+            start: [ID.getTime(),FD.getTime()],
+            step: (24*3600*1000),
+            range: {
+                'min': ID.getTime(),
+                'max': FD.getTime()
+            },
+            connect: true,
+            format: {
+                from: Number,
+                to: v => timestampToStr(v)
+            },
+            tooltips: [true,true]
+        });
+
+        mergeTooltips(dateSlider, 30, ' - ');
+
+        var ageSlider = document.getElementById('edad');
+
+        noUiSlider.create(ageSlider, {
+            start: [0,100],
+            step: 1,
+            connect: true,
+            tooltips: [true, true],
+            range: {
+                'min': 0,
+                'max': 100
+            },
+            format: {
+                // 'to' the formatted value. Receives a number. (Cambiar este)
+                to: v => v,
+                // 'from' the formatted value.
+                // Receives a string, should return a number. (Dejar igual)
+                from: v => v
+            }
+        });
+
+        mergeTooltips(ageSlider, 15, ' - ');
+    }
 
 </script>
 
@@ -1477,7 +1703,7 @@ progress.reading-position::-moz-progress-bar {
 </div>
 
 
-                </div></div></section>
+                </div></div></div></section>
 </div></div></div><div class="clearfix"></div><footer class="pb-5 bg-primary-3 text-light"><div class="container"><div class="row mb-4 justify-content-center centered-footer"><div class="col-auto"><div id="text-3" class="widget footer-widget widget_text"><div class="textwidget"><div class="text-center"><img class="aligncenter wp-image-2123 lazyload" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="https://covidanalytics.isci.cl/wp-content/uploads/2020/05/Logo-CovidAnalytics-Isci_v2.png" alt="" width="180" height="46" /><noscript><img class="aligncenter wp-image-2123 lazyload" src="https://covidanalytics.isci.cl/wp-content/uploads/2020/05/Logo-CovidAnalytics-Isci_v2.png" alt="" width="180" height="46" srcset="https://covidanalytics.isci.cl/wp-content/uploads/2020/05/Logo-CovidAnalytics-Isci_v2.png 1961w, https://covidanalytics.isci.cl/wp-content/uploads/2020/05/Logo-CovidAnalytics-Isci_v2-300x76.png 300w, https://covidanalytics.isci.cl/wp-content/uploads/2020/05/Logo-CovidAnalytics-Isci_v2-1024x261.png 1024w, https://covidanalytics.isci.cl/wp-content/uploads/2020/05/Logo-CovidAnalytics-Isci_v2-768x196.png 768w, https://covidanalytics.isci.cl/wp-content/uploads/2020/05/Logo-CovidAnalytics-Isci_v2-1536x392.png 1536w" sizes="(max-width: 180px) 100vw, 180px" /></noscript></div></div></div><div id="custom_html-3" class="widget_text widget footer-widget widget_custom_html"><div class="textwidget custom-html-widget"><!--<ul class="nav justify-content-center"><li class="nav-item"> <a class="nav-link" href="https://covidanalytics.isci.cl/movilidad/">Movilidad</a></li><li class="nav-item"> <a class="nav-link" href="https://covidanalytics.isci.cl/reportes/">Reportes</a></li><li class="nav-item"> <a class="nav-link" href="https://covidanalytics.isci.cl/equipo/">Equipo</a></li><li class="nav-item"> <a class="nav-link" href="https://covidanalytics.isci.cl/contacto/">Contacto</a></li></ul> --><ul class="nav justify-content-center"><li class="nav-item"> <a class="nav-link" href="https://covidanalytics.isci.cl/">Iniciativas</a></li><li class="nav-item"> <a class="nav-link" href="https://covidanalytics.isci.cl/contacto/">Contacto</a></li></ul></div></div></div></div><div class="row justify-content-center mt-5 mb-5"><div class="col-auto"><ul class="nav"></ul></div></div><div class="row justify-content-center text-center"><div class="col-xl-10"> <small class="text-muted">&copy; 2020 Covidanalytics. Por <a href="https://isci.cl/">ISCI</a></small></div></div></div></footer> <a href="#" class="btn back-to-top btn-primary btn-round" data-smooth-scroll data-aos="fade-up" data-aos-offset="2000" data-aos-mirror="true" data-aos-once="false"> <svg class="icon" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><title>Arrow-up</title><link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin/>
     <style type="text/css">
         @font-face {
