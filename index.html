@@ -969,7 +969,6 @@ progress.reading-position::-moz-progress-bar {
 
         actualData = processData(actualRawData);
         console.log(actualRawData);
-        console.log('wewe');
         console.log(actualData);
     }
 
@@ -1134,7 +1133,6 @@ progress.reading-position::-moz-progress-bar {
     }
 
     function paintMap(){
-        console.log('hola')
         let newData = blendData(comunas,actualData);
         let zones = d3.selectAll(".stgo")
             .style('fill',function (d){
