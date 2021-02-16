@@ -696,10 +696,14 @@ progress.reading-position::-moz-progress-bar {
 
 
 <div class="container">
+
     <div class="row">
         <h1 style="color: #fff;">
-            Estadisticas de tests seroprevalencia realizados
+            Visor seroprevalencia
         </h1>
+        <p style="color: #FFFFFF">
+            El siguiente visor presenta los resultados de los test realizados durante el estudio, previo a un analisis estadistico. Para mas detalles respecto a los parámetros de operación del test utilizado, revisar <a style="color: #FFFFFF" href="INFORME%20ENSAYO%20RAPIDO%20DETECCION%20ANTICUERPOS%20IgM%20IgG%20Medomics.pdf" target="_blank">aquí</a> y <a style="color: #FFFFFF" href="51-PI-002.CE_EN_Rev-01_interactive.pdf" target="_blank">aquí</a>.
+        </p>
     </div>
     <div class="row">
         <div class="col-lg-12">
@@ -767,6 +771,18 @@ progress.reading-position::-moz-progress-bar {
                 <h6 style="color: #fff;">Edad</h6>
                     <br><br>
                     <div id="edad" style="width: 80%; margin-left: 30px"></div>
+            </div>
+            <br>
+            <div>
+                <h6 style="color: #fff;">Frecuencia de salidas</h6>
+                <select id="salidas" name="salidas" class="form-control" required="true">
+                    <option disabled="true" selected="true" value="" id="nofrec">Seleccione una frecuencia</option>
+                    <option value="No responde">No responde</option>
+                    <option value="Menos de 3 veces">Menos de 3 veces</option>
+                    <option value="3 a 5 veces">3 a 5 veces</option>
+                    <option value="6 a 7 veces">6 a 7 veces</option>
+                    <option value="Más de 7 veces">Más de 7 veces</option>
+                </select>
             </div>
             <br>
             <div>
@@ -941,6 +957,10 @@ progress.reading-position::-moz-progress-bar {
     // Data functions
     function asingFullData(data){
         fullRawData = data;
+        console.log('hola');
+        console.log(data.filter(function (d){
+            return d.Salidas!=""
+        }));
     }
 
     function filterData(){
@@ -958,6 +978,12 @@ progress.reading-position::-moz-progress-bar {
                     conditions[i++] = d['Edad']>=filters[k];
                 else if (k == 'maxAge')
                     conditions[i++] = d['Edad']<=filters[k];
+                else if (k == 'Salidas'){
+                    if (filters[k]=='No responde')
+                        conditions[i++] = (d[k]=='' || isNumber(d[k]));
+                    else
+                        conditions[i++] = d[k]==filters[k];
+                }
                 else
                     conditions[i++] = d[k]==filters[k];
             }
@@ -1030,7 +1056,7 @@ progress.reading-position::-moz-progress-bar {
         let rect1 = el1.getBoundingClientRect();
         let el2   = document.getElementById("dfiltros"); // or other selector like querySelector()
         let rect2 = el2.getBoundingClientRect();
-        let height = (rect2.height - rect1.height)/3;
+        let height = (rect2.height - rect1.height)/3.5;
         d3.select("#dntotal").append("div").attr("class","myimg").style("margin-right","20px").style("height",Math.round(height)+"px").style("width",Math.round(height)+"px").append("i").attr("data-feather","users");
         d3.select("#dnpos").append("div").attr("class","myimg").style("margin-right","20px").style("height",Math.round(height)+"px").style("width",Math.round(height)+"px").append("i").attr("data-feather","user-plus");
         d3.select("#dnneg").append("div").attr("class","myimg").style("margin-right","20px").style("height",Math.round(height)+"px").style("width",Math.round(height)+"px").append("i").attr("data-feather","user-minus");
@@ -1482,20 +1508,23 @@ progress.reading-position::-moz-progress-bar {
     function applyFilters(){
         let setFilters = new Promise(() => {
             filters = {};
-            var dateSlider = document.getElementById('fecha').noUiSlider.get();
+            let dateSlider = document.getElementById('fecha').noUiSlider.get();
             if (!arraysEqual(dateSlider,[SID,SFD])){
                 filters['minDate'] = dateSlider[0];
                 filters['maxDate'] = dateSlider[1];
             }
-            var ageSlider = document.getElementById('edad').noUiSlider.get();
+            let ageSlider = document.getElementById('edad').noUiSlider.get();
             if (!arraysEqual(ageSlider,[0,100])){
                 filters['minAge'] = ageSlider[0];
                 filters['maxAge'] = ageSlider[1];
             }
-            var sexo = document.querySelector('input[name="sexo"]:checked');
+            let frecuencia = document.getElementById('salidas');
+            if (frecuencia.value != '')
+                filters['Salidas'] = frecuencia.value;
+            let sexo = document.querySelector('input[name="sexo"]:checked');
             if(sexo)
                 filters['Sexo'] = sexo.value;
-            var comor = document.getElementsByClassName("form-check-input");
+            let comor = document.getElementsByClassName("form-check-input");
             for (i in comor){
                 if (comor[i].type=='checkbox'){
                     if(comor[i].checked)
@@ -1520,12 +1549,14 @@ progress.reading-position::-moz-progress-bar {
             .then(mapFilters())
             .then(updateNumbers());
 
-        var dateSlider = document.getElementById('fecha');
+        let dateSlider = document.getElementById('fecha');
         dateSlider.noUiSlider.set([ID.getTime(),FD.getTime()]);
-        var ageSlider = document.getElementById('edad');
+        let ageSlider = document.getElementById('edad');
         ageSlider.noUiSlider.set([0,100]);
 
-        var choices = document.getElementsByClassName("form-check-input");
+        document.getElementById('salidas').value = "";
+
+        let choices = document.getElementsByClassName("form-check-input");
         for (i in choices)
             choices[i].checked = false;
     }
@@ -1663,6 +1694,7 @@ progress.reading-position::-moz-progress-bar {
         mergeTooltips(ageSlider, 15, ' - ');
     }
 
+    function isNumber(n) { return !isNaN(parseFloat(n)) && !isNaN(n - 0) }
 </script>
 
 
