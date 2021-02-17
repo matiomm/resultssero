@@ -702,7 +702,10 @@ progress.reading-position::-moz-progress-bar {
             Visor seroprevalencia
         </h1>
         <p style="color: #FFFFFF">
-            El siguiente visor presenta los resultados de los test realizados durante el estudio, previo a un analisis estadistico. Para mas detalles respecto a los parámetros de operación del test utilizado, revisar <a style="color: #FFFFFF" href="INFORME%20ENSAYO%20RAPIDO%20DETECCION%20ANTICUERPOS%20IgM%20IgG%20Medomics.pdf" target="_blank">aquí</a> y <a style="color: #FFFFFF" href="51-PI-002.CE_EN_Rev-01_interactive.pdf" target="_blank">aquí</a>.
+            El siguiente visor presenta los resultados de los test realizados durante el estudio, actualizado al <span id="fechaAct"></span>. Estos valores indican el número de tests positivos, negativos y no concluyentes según la lectura del personal de salud en terreno, pero no constituye aún un análisis estadístico acabado de la población general. Es importante considerar que los valores por comuna, o los valores después de aplicar filtros, pueden  ser poco representativos si es que el número de tests es pequeño. Para mas detalles respecto a los parámetros de operación del test utilizado, revisar
+            <a style="color: #FFFFFF" href="INFORME%20ENSAYO%20RAPIDO%20DETECCION%20ANTICUERPOS%20IgM%20IgG%20Medomics.pdf" target="_blank">aquí</a> y <a style="color: #FFFFFF" href="51-PI-002.CE_EN_Rev-01_interactive.pdf" target="_blank">aquí</a>.
+            <br>
+            Por el momento no se ha incluido en este visor los resultados de personas que hayan sido vacunadas.
         </p>
     </div>
     <div class="row">
@@ -917,6 +920,7 @@ progress.reading-position::-moz-progress-bar {
         FD = new Date(Math.max.apply(null, dates));
         SID = ID.getDate()+"/"+(ID.getMonth()+1)+"/"+ID.getFullYear();
         SFD = FD.getDate()+"/"+(FD.getMonth()+1)+"/"+FD.getFullYear();
+        document.getElementById('fechaAct').innerHTML = SFD;
     }
 
     function fixGeojsons(data){
@@ -956,11 +960,10 @@ progress.reading-position::-moz-progress-bar {
 
     // Data functions
     function asingFullData(data){
-        fullRawData = data;
-        console.log('hola');
-        console.log(data.filter(function (d){
-            return d.Salidas!=""
-        }));
+        // fullRawData = data;
+        fullRawData = data.filter(function (d){
+            return d.VacunaC19==0
+        });
     }
 
     function filterData(){
